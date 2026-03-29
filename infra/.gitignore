@@ -1,0 +1,13 @@
+*.swp
+package-lock.json
+__pycache__
+.pytest_cache
+.venv
+*.egg-info
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+# Should arguably be committed for perfect reproducibility, but don't want to expose my accountId here.
+cdk.context.json
