@@ -12,6 +12,12 @@ spec:
     helm:
       dependencyUpdate: true
       ServerSideApply: false
+      valueFiles:
+        - values.yaml
+      valuesFrom:
+        - secretRef:
+            name: karpenter-config
+            namespace: karpenter
   destination:
     server: https://kubernetes.default.svc
     namespace: karpenter
