@@ -1,0 +1,8 @@
+apiVersion: v2
+name: karpenter
+version: 0.1.0
+description: Wrapped Karpenter helm chart
+dependencies:
+  - name: karpenter
+    repository: oci://public.ecr.aws/karpenter
+    version: "1.3.3"

@@ -1,0 +1,16 @@
+argocd:
+  server:
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: false
+
+  controller:
+    extraArgs:
+      - --loglevel=info
+
+  global:
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule

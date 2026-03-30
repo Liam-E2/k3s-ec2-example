@@ -1,0 +1,9 @@
+apiVersion: v2
+name: external-secrets-operator
+version: 0.1.0
+description: Wrapped External Secrets Operator helm chart
+dependencies:
+  - name: external-secrets
+    repository: https://charts.external-secrets.io
+    version: "2.1.0"
+    alias: eso

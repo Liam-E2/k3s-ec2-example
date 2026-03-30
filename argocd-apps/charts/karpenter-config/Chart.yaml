@@ -1,4 +1,0 @@
-apiVersion: v2
-name: karpenter-config
-version: 0.1.0
-description: Karpenter EC2NodeClass and NodePool for llamadist

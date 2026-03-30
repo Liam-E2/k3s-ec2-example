@@ -1,0 +1,9 @@
+apiVersion: v2
+name: argocd
+version: 0.1.0
+description: Wrapped ArgoCD helm chart
+dependencies:
+  - name: argo-cd
+    repository: https://argoproj.github.io/argo-helm
+    version: "9.4.17"
+    alias: argocd

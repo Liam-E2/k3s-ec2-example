@@ -1,0 +1,63 @@
+clusterName: llamadist
+
+karpenter:
+  serviceAccount:
+    name: karpenter
+
+  settings:
+    clusterName: "llamadist"
+    clusterEndpoint: ""
+    interruptionQueue: ""
+
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
+
+  replicas: 1
+  logLevel: debug
+
+  topologySpreadConstraints: []
+
+  extraVolumes:
+    - name: aws-iam-token
+      projected:
+        sources:
+          - serviceAccountToken:
+              audience: sts.amazonaws.com
+              expirationSeconds: 86400
+              path: token
+
+  controller:
+    env:
+      - name: AWS_REGION
+        value: us-east-1
+      - name: AWS_DEFAULT_REGION
+        value: us-east-1
+      - name: AWS_ROLE_ARN
+        valueFrom:
+          secretKeyRef:
+            name: karpenter-config
+            key: controllerRoleArn
+      - name: AWS_WEB_IDENTITY_TOKEN_FILE
+        value: /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+      - name: NLB_DNS
+        valueFrom:
+          secretKeyRef:
+            name: karpenter-config
+            key: nlbDns
+      - name: CLUSTER_ENDPOINT
+        value: "https://$(NLB_DNS):6443"
+      - name: INTERRUPTION_QUEUE
+        valueFrom:
+          secretKeyRef:
+            name: karpenter-config
+            key: interruptionQueue
+
+    extraVolumeMounts:
+      - name: aws-iam-token
+        mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
+        readOnly: true
