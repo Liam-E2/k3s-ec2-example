@@ -5,5 +5,5 @@ description: Wrapped External Secrets Operator helm chart
 dependencies:
   - name: external-secrets
     repository: https://charts.external-secrets.io
-    version: "2.1.0"
+    version: "2.2.0"
     alias: eso
