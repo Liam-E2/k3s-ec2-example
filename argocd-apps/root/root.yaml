@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Liam-E2/k3s-ec2-example
-    path: argocd-apps
+    path: argocd-apps/apps
     targetRevision: main
     directory:
       recurse: true

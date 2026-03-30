@@ -47,10 +47,11 @@ class InfraStack(Stack):
         karpenter_role = self._build_karpenter_controller_role(oidc_provider, cluster_name)
         _, node_profile = self._build_karpenter_node_role(cluster_token)
         interruption_queue = self._build_karpenter_interruption_queue(cluster_name)
+        eso_role = self._build_eso_role(oidc_provider, cluster_name)
 
         self._build_ssm_params(
             cp_role, cluster_name, nlb, issuer_url,
-            cluster_token, karpenter_role, node_profile, interruption_queue,
+            cluster_token, karpenter_role, node_profile, interruption_queue, eso_role,
         )
 
         cp_asg = self._build_control_plane(
@@ -235,6 +236,40 @@ class InfraStack(Stack):
         ))
 
         return controller_role
+
+    def _build_eso_role(
+        self,
+        oidc_provider: iam.OpenIdConnectProvider,
+        cluster_name: str,
+    ) -> iam.Role:
+        oidc_arn = oidc_provider.open_id_connect_provider_arn
+        oidc_issuer = oidc_provider.open_id_connect_provider_issuer
+        oidc_conditions = CfnJson(self, "EsoOidcConditions", value={
+            f"{oidc_issuer}:aud": "sts.amazonaws.com",
+            f"{oidc_issuer}:sub": "system:serviceaccount:external-secrets:external-secrets",
+        })
+
+        eso_role = iam.Role(self, "EsoControllerRole",
+            assumed_by=iam.FederatedPrincipal(
+                federated=oidc_arn,
+                conditions={"StringEquals": oidc_conditions},
+                assume_role_action="sts:AssumeRoleWithWebIdentity",
+            ),
+            description="External Secrets Operator IRSA role",
+        )
+
+        eso_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath",
+            ],
+            resources=[
+                f"arn:aws:ssm:{self.region}:{self.account}:parameter/{cluster_name}/*",
+            ],
+        ))
+
+        return eso_role
 
     def _build_karpenter_node_role(
         self,
@@ -421,6 +456,7 @@ class InfraStack(Stack):
         karpenter_role: iam.Role,
         node_profile: iam.CfnInstanceProfile,
         interruption_queue: sqs.Queue,
+        eso_role: iam.Role,
     ) -> None:
         ssm.StringParameter(self, "NlbDnsParam",
             parameter_name=f"/{cluster_name}/nlb-dns",
@@ -464,6 +500,10 @@ class InfraStack(Stack):
         ssm.StringParameter(self, "KarpenterInterruptionQueueParam",
             parameter_name=f"/{cluster_name}/karpenter/interruption-queue",
             string_value=interruption_queue.queue_name,
+        )
+        ssm.StringParameter(self, "EsoControllerRoleArnParam",
+            parameter_name=f"/{cluster_name}/eso/controller-role-arn",
+            string_value=eso_role.role_arn,
         )
 
     # ── Control Plane ─────────────────────────────────────────────────────────

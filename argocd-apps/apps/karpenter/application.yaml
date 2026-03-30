@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-secrets-operator
+  name: karpenter
   namespace: argocd
 spec:
   project: default
   sources:
-    - repoURL: https://charts.external-secrets.io
-      chart: external-secrets
-      targetRevision: "0.14.0"
+    - repoURL: oci://public.ecr.aws/karpenter
+      chart: karpenter
+      targetRevision: "1.3.3"
       helm:
         valueFiles:
-          - $values/argocd-apps/apps/external-secrets-operator/values.yaml
+          - $values/karpenter/values.yaml
     - repoURL: https://github.com/Liam-E2/k3s-ec2-example
       targetRevision: main
       ref: values
     - repoURL: https://github.com/Liam-E2/k3s-ec2-example
       targetRevision: main
-      path: argocd-apps/charts/external-secrets-operator-config
+      path: argocd-apps/charts/karpenter-config
   destination:
     server: https://kubernetes.default.svc
-    namespace: external-secrets
+    namespace: karpenter
   syncPolicy:
     automated:
       prune: true
