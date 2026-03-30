@@ -1,0 +1,55 @@
+# Run ESO on control-plane nodes (which carry the NoSchedule taint)
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"
+
+serviceAccount:
+  name: external-secrets
+
+# Bootstrap the role ARN secret once after CDK deploy using eso-bootstrap.sh
+extraVolumes:
+  - name: aws-iam-token
+    projected:
+      sources:
+        - serviceAccountToken:
+            audience: sts.amazonaws.com
+            expirationSeconds: 86400
+            path: token
+
+extraVolumeMounts:
+  - name: aws-iam-token
+    mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
+    readOnly: true
+
+extraEnv:
+  - name: AWS_REGION
+    value: us-east-1
+  - name: AWS_DEFAULT_REGION
+    value: us-east-1
+  - name: AWS_ROLE_ARN
+    valueFrom:
+      secretKeyRef:
+        name: eso-irsa-config
+        key: roleArn
+  - name: AWS_WEB_IDENTITY_TOKEN_FILE
+    value: /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+
+webhook:
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
+
+certController:
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "true"
