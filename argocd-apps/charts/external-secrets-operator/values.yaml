@@ -2,6 +2,7 @@ clusterName: llamadist
 region: us-east-1
 
 eso:
+  installCRDS: true
   tolerations:
     - key: "node-role.kubernetes.io/control-plane"
       operator: "Exists"
