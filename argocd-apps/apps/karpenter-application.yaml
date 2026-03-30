@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/Liam-E2/k3s-ec2-example
     targetRevision: main
-    path: charts/karpenter
+    path: argocd-apps/charts/karpenter
     helm:
       dependencyUpdate: true
   destination:
