@@ -9,6 +9,8 @@ spec:
     repoURL: https://github.com/Liam-E2/k3s-ec2-example
     path: argocd-apps
     targetRevision: main
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: default
