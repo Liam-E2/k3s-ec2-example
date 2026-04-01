@@ -1,3 +1,7 @@
+{{- $secret := lookup "v1" "Secret" "karpenter" "karpenter-config" }}
+{{- $nlbDns          := $secret.data.nlbDns             | b64dec }}
+{{- $clusterTokenArn := $secret.data.clusterTokenArn     | b64dec }}
+{{- $instanceProfile := $secret.data.nodeInstanceProfile | b64dec }}
 apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
 metadata:
@@ -17,7 +21,7 @@ spec:
     - tags:
         karpenter.sh/discovery: {{ .Values.clusterName | quote }}
 
-  instanceProfile: {{ .Values.instanceProfile | quote }}
+  instanceProfile: {{ $instanceProfile | quote }}
 
   userData: |
     #!/bin/bash
