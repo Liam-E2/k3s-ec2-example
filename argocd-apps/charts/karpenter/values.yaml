@@ -1,4 +1,5 @@
 clusterName: llamadist
+instanceProfile: KarpenterNodeProfile-InfraStack
 
 karpenter:
   serviceAccount:
